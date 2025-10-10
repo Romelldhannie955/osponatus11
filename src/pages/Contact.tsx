@@ -94,7 +94,7 @@ const Contact: React.FC = () => {
           </div>
           
           <div className="space-y-4 text-slate-gray dark:text-slate-gray">
-            <p>Need immediate assistance? Call us at <a href="tel:+15551234567" className="text-vibrant-teal font-semibold">+1 (555) 123-4567</a></p>
+            <p>Need immediate assistance? Call us at <a href="tel:+442071234567" className="text-vibrant-teal font-semibold">+44 20 7123 4567</a></p>
             <p>Or email us directly at <a href="mailto:hello@osponatus.com" className="text-vibrant-teal font-semibold">hello@osponatus.com</a></p>
           </div>
         </div>
@@ -140,8 +140,8 @@ const Contact: React.FC = () => {
                     </div>
                     <div>
                       <p className="font-medium">Phone</p>
-                      <a href="tel:+15551234567" className="text-vibrant-teal hover:underline">
-                        +1 (555) 123-4567
+                      <a href="tel:+442071234567" className="text-vibrant-teal hover:underline">
+                        +44 20 7123 4567
                       </a>
                     </div>
                   </div>
@@ -164,7 +164,7 @@ const Contact: React.FC = () => {
                     </div>
                     <div>
                       <p className="font-medium">Location</p>
-                      <p className="text-slate-gray">San Francisco, CA</p>
+                      <p className="text-slate-gray">London, UK</p>
                       <p className="text-slate-gray text-sm">Serving clients worldwide</p>
                     </div>
                   </div>
@@ -175,7 +175,7 @@ const Contact: React.FC = () => {
                     </div>
                     <div>
                       <p className="font-medium">Business Hours</p>
-                      <p className="text-slate-gray text-sm">Mon-Fri: 9:00 AM - 6:00 PM PST</p>
+                      <p className="text-slate-gray text-sm">Mon-Fri: 9:00 AM - 6:00 PM GMT</p>
                       <p className="text-slate-gray text-sm">24/7 AI systems monitoring</p>
                     </div>
                   </div>

@@ -231,7 +231,7 @@ const Home: React.FC = () => {
               <Calendar className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
             </Link>
             <a
-              href="tel:+15551234567"
+              href="tel:+442071234567"
               className="border-2 border-vibrant-teal text-vibrant-teal hover:bg-vibrant-teal hover:text-white px-8 py-4 rounded-lg font-semibold transition-colors duration-200"
             >
               Call Us Now
