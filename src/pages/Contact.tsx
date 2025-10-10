@@ -51,10 +51,10 @@ const Contact: React.FC = () => {
   ];
 
   const budgetRanges = [
-    'Under $5,000/month',
-    '$5,000 - $15,000/month',
-    '$15,000 - $50,000/month',
-    '$50,000+/month',
+    'Under £6,000/month',
+    '£6,000 - £16,000/month',
+    '£16,000 - £51,000/month',
+    '£51,000+/month',
     'Let\'s discuss'
   ];
 
