@@ -51,10 +51,10 @@ const Contact: React.FC = () => {
   ];
 
   const budgetRanges = [
-    'Under £6,000/month',
-    '£6,000 - £16,000/month',
-    '£16,000 - £51,000/month',
-    '£51,000+/month',
+    'Under $5,000/month',
+    '$5,000 - $15,000/month',
+    '$15,000 - $50,000/month',
+    '$50,000+/month',
     'Let\'s discuss'
   ];
 
@@ -187,7 +187,7 @@ const Contact: React.FC = () => {
                     <span className="font-medium text-warm-gold">Free Consultation</span>
                   </div>
                   <p className="text-sm text-slate-gray">
-                    Get a custom AI automation strategy session worth £500 - completely free.
+                    Get a custom AI automation strategy session worth £1500 - completely free.
                   </p>
                 </div>
               </div>
