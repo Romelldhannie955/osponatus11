@@ -35,7 +35,7 @@ const Services: React.FC = () => {
         '24/7 automated lead processing',
         'Seamless CRM integration'
       ],
-      pricing: 'Starting at $297/month'
+      pricing: 'Starting at £297/month'
     },
     {
       icon: Settings,
@@ -55,7 +55,7 @@ const Services: React.FC = () => {
         'Complete visibility across teams',
         'Improved data accuracy and consistency'
       ],
-      pricing: 'Starting at $497/month'
+      pricing: 'Starting at £497/month'
     },
     {
       icon: MessageSquare,
@@ -75,7 +75,7 @@ const Services: React.FC = () => {
         '24/7 automated customer assistance',
         '95% customer satisfaction rate'
       ],
-      pricing: 'Starting at $397/month'
+      pricing: 'Starting at £397/month'
     },
     {
       icon: Calendar,
@@ -95,7 +95,7 @@ const Services: React.FC = () => {
         'Elimination of double bookings',
         'Increased revenue per appointment'
       ],
-      pricing: 'Starting at $197/month',
+      pricing: 'Starting at £197/month',
       isPopular: true
     },
     {
@@ -116,7 +116,7 @@ const Services: React.FC = () => {
         'Automated follow-up sequences',
         'Personalization at scale'
       ],
-      pricing: 'Starting at $597/month'
+      pricing: 'Starting at £597/month'
     },
     {
       icon: Globe,
@@ -136,7 +136,7 @@ const Services: React.FC = () => {
         'Built-in marketing automation',
         'Continuous optimization'
       ],
-      pricing: 'Starting at $797/month'
+      pricing: 'Starting at £797/month'
     }
   ];
 

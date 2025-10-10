@@ -187,7 +187,7 @@ const Contact: React.FC = () => {
                     <span className="font-medium text-warm-gold">Free Consultation</span>
                   </div>
                   <p className="text-sm text-slate-gray">
-                    Get a custom AI automation strategy session worth $500 - completely free.
+                    Get a custom AI automation strategy session worth £500 - completely free.
                   </p>
                 </div>
               </div>
