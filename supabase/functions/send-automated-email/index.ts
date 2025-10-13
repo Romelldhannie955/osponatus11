@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.39.3';
+import { Resend } from 'npm:resend@3.2.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -36,6 +37,19 @@ Deno.serve(async (req: Request) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    if (!resendApiKey) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'RESEND_API_KEY not configured',
+          instructions: 'Get your API key from https://resend.com/api-keys and add it to your Supabase project secrets'
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const fromEmail = Deno.env.get('FROM_EMAIL') || 'onboarding@resend.dev';
+
     const { campaignId, customerId, subject, content, useAI }: EmailRequest = await req.json();
 
     // Send single email to specific customer
@@ -53,26 +67,41 @@ Deno.serve(async (req: Request) => {
         );
       }
 
+      let personalizedSubject = subject;
       let personalizedContent = content;
 
-      // AI personalization (placeholder for your AI API integration)
+      // Personalization
       if (useAI) {
-        personalizedContent = await personalizeWithAI(content, customer);
+        personalizedSubject = personalizeContent(personalizedSubject, customer);
+        personalizedContent = personalizeContent(personalizedContent, customer);
       }
 
-      // Simulate email sending (integrate with SendGrid, Resend, etc.)
-      const emailResult = await sendEmail(customer.email, subject, personalizedContent);
+      // Send email via Resend
+      const emailResult = await sendEmail(
+        resendApiKey,
+        fromEmail,
+        customer.email,
+        personalizedSubject,
+        personalizedContent
+      );
+
+      if (!emailResult.success) {
+        return new Response(
+          JSON.stringify({ error: 'Failed to send email', details: emailResult.error }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
 
       // Log interaction
       await supabase.from('customer_interactions').insert({
         customer_id: customerId,
         interaction_type: 'email_sent',
-        description: `Sent email: ${subject}`,
-        metadata: { subject, ai_personalized: useAI },
+        description: `Sent email: ${personalizedSubject}`,
+        metadata: { subject: personalizedSubject, ai_personalized: useAI, email_id: emailResult.id },
       });
 
       return new Response(
-        JSON.stringify({ success: true, message: 'Email sent', emailResult }),
+        JSON.stringify({ success: true, message: 'Email sent successfully', emailId: emailResult.id }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -110,21 +139,40 @@ Deno.serve(async (req: Request) => {
 
       const results = [];
       for (const customer of customers) {
+        let personalizedSubject = campaign.subject;
         let personalizedContent = campaign.content;
 
         if (campaign.ai_personalized) {
-          personalizedContent = await personalizeWithAI(campaign.content, customer);
+          personalizedSubject = personalizeContent(personalizedSubject, customer);
+          personalizedContent = personalizeContent(personalizedContent, customer);
         }
 
-        const emailResult = await sendEmail(customer.email, campaign.subject, personalizedContent);
-        results.push({ customer: customer.email, status: emailResult.success ? 'sent' : 'failed' });
+        const emailResult = await sendEmail(
+          resendApiKey,
+          fromEmail,
+          customer.email,
+          personalizedSubject,
+          personalizedContent
+        );
+
+        results.push({ 
+          customer: customer.email, 
+          status: emailResult.success ? 'sent' : 'failed',
+          error: emailResult.error,
+          emailId: emailResult.id
+        });
 
         // Log interaction
         await supabase.from('customer_interactions').insert({
           customer_id: customer.id,
           interaction_type: 'email_sent',
           description: `Campaign: ${campaign.name}`,
-          metadata: { campaign_id: campaignId, subject: campaign.subject },
+          metadata: { 
+            campaign_id: campaignId, 
+            subject: personalizedSubject,
+            email_id: emailResult.id,
+            success: emailResult.success
+          },
         });
       }
 
@@ -134,8 +182,14 @@ Deno.serve(async (req: Request) => {
         .update({ status: 'sent', sent_at: new Date().toISOString() })
         .eq('id', campaignId);
 
+      const successCount = results.filter(r => r.status === 'sent').length;
+
       return new Response(
-        JSON.stringify({ success: true, message: `Sent ${results.length} emails`, results }),
+        JSON.stringify({ 
+          success: true, 
+          message: `Sent ${successCount}/${results.length} emails successfully`, 
+          results 
+        }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -152,53 +206,42 @@ Deno.serve(async (req: Request) => {
   }
 });
 
-// AI personalization function (integrate with OpenAI, Anthropic, etc.)
-async function personalizeWithAI(content: string, customer: Customer): Promise<string> {
-  // Replace {{first_name}}, {{company}}, etc. with customer data
-  let personalized = content
+// Personalization function - replaces template variables with customer data
+function personalizeContent(content: string, customer: Customer): string {
+  return content
     .replace(/{{first_name}}/g, customer.first_name || 'there')
     .replace(/{{last_name}}/g, customer.last_name || '')
     .replace(/{{company}}/g, customer.company || 'your company')
     .replace(/{{email}}/g, customer.email);
-
-  // TODO: Add actual AI API call here
-  // Example with OpenAI:
-  // const response = await fetch('https://api.openai.com/v1/chat/completions', {
-  //   method: 'POST',
-  //   headers: {
-  //     'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     model: 'gpt-4',
-  //     messages: [{
-  //       role: 'user',
-  //       content: `Personalize this email for ${customer.first_name}: ${personalized}`
-  //     }]
-  //   })
-  // });
-
-  return personalized;
 }
 
-// Email sending function (integrate with SendGrid, Resend, etc.)
-async function sendEmail(to: string, subject: string, content: string) {
-  // TODO: Replace with actual email service integration
-  // Example with Resend:
-  // const response = await fetch('https://api.resend.com/emails', {
-  //   method: 'POST',
-  //   headers: {
-  //     'Authorization': `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     from: 'noreply@yourdomain.com',
-  //     to,
-  //     subject,
-  //     html: content,
-  //   })
-  // });
+// Email sending function using Resend
+async function sendEmail(
+  apiKey: string,
+  from: string,
+  to: string,
+  subject: string,
+  content: string
+): Promise<{ success: boolean; id?: string; error?: string }> {
+  try {
+    const resend = new Resend(apiKey);
 
-  console.log(`Simulated email sent to ${to}: ${subject}`);
-  return { success: true, message: 'Email sent (simulated)' };
+    const { data, error } = await resend.emails.send({
+      from,
+      to,
+      subject,
+      html: content,
+    });
+
+    if (error) {
+      console.error('Resend error:', error);
+      return { success: false, error: error.message || JSON.stringify(error) };
+    }
+
+    console.log(`Email sent successfully to ${to}, ID: ${data?.id}`);
+    return { success: true, id: data?.id };
+  } catch (error) {
+    console.error('Email sending error:', error);
+    return { success: false, error: error.message };
+  }
 }
