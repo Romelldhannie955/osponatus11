@@ -9,8 +9,9 @@ const Header: React.FC = () => {
 
   const navigation = [
     { name: 'Home', href: '/' },
-    { name: 'Services', href: '/services' },
-    { name: 'Contact', href: '/contact' },
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Customers', href: '/customers' },
+    { name: 'Campaigns', href: '/campaigns' },
   ];
 
   const isActive = (href: string) => location.pathname === href;
